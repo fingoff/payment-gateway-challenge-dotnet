@@ -70,40 +70,38 @@ namespace PaymentGateway.Controllers
                 {
                     return BadRequest("Error from Bank Simulator.");
                 }
-            }
-            catch (HttpRequestException)
-            {
-                return BadRequest("Error communicating with Bank Simulator.");
-            }
 
-            // Read and deserialize the response
-            string jsonResponse = await response.Content.ReadAsStringAsync();
-            BankSimulatorResponse bankResponse;
-            try
-            {
+                // Read and deserialize the response
+                string jsonResponse = await response.Content.ReadAsStringAsync();
+                BankSimulatorResponse bankResponse;
+
                 bankResponse = JsonSerializer.Deserialize<BankSimulatorResponse>(jsonResponse);
                 if (bankResponse == null)
                 {
                     throw new JsonException("Deserialized response is null.");
                 }
+
+                // Create the payment response
+                Guid id = Guid.NewGuid();
+                StatusEnum status = bankResponse.Authorized ? StatusEnum.Authorized : StatusEnum.Declined;
+                string last4CardDigits = request.CardNumber.Substring(request.CardNumber.Length - 4);
+                CurrencyCodes currency = (CurrencyCodes)Enum.Parse(typeof(CurrencyCodes), request.Currency, true);
+                
+                PaymentResponse paymentResponse = new(id, status, last4CardDigits, request.ExpiryMonth, request.ExpiryYear, currency, request.Amount);
+
+                // Save payment details to in-memory store
+                InMemoryPaymentStore.SavePayment(paymentResponse);
+
+                return Ok(paymentResponse);
+            }
+            catch (HttpRequestException)
+            {
+                return BadRequest("Error communicating with Bank Simulator.");
             }
             catch (JsonException)
             {
                 return BadRequest("Invalid response from Bank Simulator.");
             }
-
-            // Create the payment response
-            Guid id = Guid.NewGuid();
-            StatusEnum status = bankResponse.Authorized ? StatusEnum.Authorized : StatusEnum.Declined;
-            string last4CardDigits = request.CardNumber.Substring(request.CardNumber.Length - 4);
-            CurrencyCodes currency = (CurrencyCodes)Enum.Parse(typeof(CurrencyCodes), request.Currency, true);
-            
-            PaymentResponse paymentResponse = new(id, status, last4CardDigits, request.ExpiryMonth, request.ExpiryYear, currency, request.Amount);
-
-            // Save payment details to in-memory store
-            InMemoryPaymentStore.SavePayment(paymentResponse);
-
-            return Ok(paymentResponse);
         }
 
         [HttpGet]
