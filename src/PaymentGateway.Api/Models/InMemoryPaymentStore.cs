@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace PaymentGateway.Models
 {
     public static class InMemoryPaymentStore
@@ -13,7 +10,7 @@ namespace PaymentGateway.Models
                 new PaymentResponse(
                     Guid.Parse("f32bd16f-e103-425e-9fa8-faa4accc3b93"),
                     StatusEnum.Authorized,
-                    1234,
+                    "1234",
                     12,
                     2027,
                     CurrencyCodes.USD,

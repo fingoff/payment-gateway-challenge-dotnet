@@ -77,7 +77,6 @@ namespace PaymentGateway.Controllers
             }
 
             // Read and deserialize the response
-            // string jsonResponse = "{\"authorized\": false, \"authorization_code\": \"0bb07405-6d44-4b50-a14f-7ae0beff13ad\"}";
             string jsonResponse = await response.Content.ReadAsStringAsync();
             BankSimulatorResponse bankResponse;
             try
@@ -96,7 +95,7 @@ namespace PaymentGateway.Controllers
             // Create the payment response
             Guid id = Guid.NewGuid();
             StatusEnum status = bankResponse.Authorized ? StatusEnum.Authorized : StatusEnum.Declined;
-            int last4CardDigits = int.Parse(request.CardNumber.Substring(request.CardNumber.Length - 4));
+            string last4CardDigits = request.CardNumber.Substring(request.CardNumber.Length - 4);
             CurrencyCodes currency = (CurrencyCodes)Enum.Parse(typeof(CurrencyCodes), request.Currency, true);
             
             PaymentResponse paymentResponse = new(id, status, last4CardDigits, request.ExpiryMonth, request.ExpiryYear, currency, request.Amount);
