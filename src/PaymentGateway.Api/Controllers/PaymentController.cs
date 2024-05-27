@@ -68,7 +68,7 @@ namespace PaymentGateway.Controllers
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    return BadRequest("Error from Bank Simulator.");
+                    return BadRequest("Rejected: Error from Bank Simulator.");
                 }
 
                 // Read and deserialize the response
